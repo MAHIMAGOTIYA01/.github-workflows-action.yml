@@ -1,0 +1,16 @@
+name: Verify Assignment Step
+
+on:
+  push:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+jobs:
+  verify-email:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: 24ds1000002@ds.study.iitm.ac.in
+        run: echo "Workflow verified for IITM student 24ds1000002"
