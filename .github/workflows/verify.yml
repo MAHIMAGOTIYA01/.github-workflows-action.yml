@@ -1,0 +1,15 @@
+name: Verify Email Step
+
+on:
+  push:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 24ds1000002@ds.study.iitm.ac.in
+        run: |
+          echo "Verification step active for 24ds1000002@ds.study.iitm.ac.in"
+          echo "Success!"
