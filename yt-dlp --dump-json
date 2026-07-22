@@ -1,0 +1,56 @@
+import json
+import subprocess
+
+# Load task parameters
+with open("q-youtube-metadata-filter-server (1).json", "r") as f:
+    task = json.load(f)
+
+videos = []
+
+for url in task["source_urls"]:
+    try:
+        result = subprocess.run(
+            ["yt-dlp", "--dump-json", url],
+            capture_output=True,
+            text=True,
+            check=True,
+        )
+        meta = json.loads(result.stdout)
+
+        duration = meta.get("duration", 0)
+        if not (task["min_duration_seconds"] <= duration <= task["max_duration_seconds"]):
+            continue
+
+        text = (
+            (meta.get("title") or "") + " " +
+            (meta.get("description") or "")
+        ).lower()
+
+        # required words
+        if not all(w.lower() in text for w in task["required_words"]):
+            continue
+
+        # forbidden words
+        if any(w.lower() in text for w in task["forbidden_words"]):
+            continue
+
+        videos.append({
+            "url": meta["webpage_url"],
+            "upload_date": meta.get("upload_date", ""),
+            "id": meta["id"]
+        })
+
+    except Exception as e:
+        print(f"Skipping {url}: {e}")
+
+# Sort: upload_date DESC, id ASC
+videos.sort(key=lambda v: (-int(v["upload_date"]), v["id"]))
+
+result = {
+    "urls": [v["url"] for v in videos[:task["limit"]]]
+}
+
+with open("output.json", "w") as f:
+    json.dump(result, f, indent=2)
+
+print(json.dumps(result, indent=2))
